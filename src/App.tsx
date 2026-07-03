@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { usePulses } from './hooks/usePulses';
 import { PulseList } from './components/PulseList';
 import { SearchBar } from './components/SearchBar';
@@ -11,14 +11,16 @@ export function App() {
 
   const { pulses, status, toggleRead } = usePulses(query);
 
-  // TODO(checkpoint 2): `typeFilter` is tracked above and the dropdown in
-  // FilterBar already reports the selected value here — but it's never
-  // actually applied to `pulses` before rendering. Wire it up so selecting
-  // a type in the dropdown filters the visible list.
-  const visiblePulses = pulses;
+  const visiblePulses = useMemo(
+    () =>
+      typeFilter === 'all'
+        ? pulses
+        : pulses.filter((pulse) => pulse.type === typeFilter),
+    [pulses, typeFilter]
+  );
 
   const unreadCount = pulses.filter((p) => !p.read).length;
-
+  // console.log(`Rendering App with query="${query}", typeFilter="${typeFilter}", visiblePulses=${visiblePulses.length}, unreadCount=${unreadCount}`);
   return (
     <div style={{ maxWidth: 640, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>

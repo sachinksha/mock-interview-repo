@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { PulseItem } from './PulseItem';
 import type { Pulse } from '../types';
 
@@ -6,7 +7,7 @@ interface PulseListProps {
   onToggleRead: (id: string) => void;
 }
 
-export function PulseList({ pulses, onToggleRead }: PulseListProps) {
+function PulseListComponent({ pulses, onToggleRead }: PulseListProps) {
   if (pulses.length === 0) {
     return <p style={{ color: '#888', padding: 12 }}>No pulses match your search.</p>;
   }
@@ -19,3 +20,5 @@ export function PulseList({ pulses, onToggleRead }: PulseListProps) {
     </ul>
   );
 }
+
+export const PulseList = memo(PulseListComponent);

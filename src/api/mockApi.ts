@@ -23,7 +23,12 @@ const ALL_PULSES: Pulse[] = [
  * common characteristic of real backends: response time is NOT guaranteed to
  * correlate with request order.
  */
-export function fetchPulses(query: string, delayMs?: number): Promise<Pulse[]> {
+export function fetchPulses(
+  query: string,
+  delayMs?: number,
+  signal?: AbortSignal
+): Promise<Pulse[]> {
+  // console.log(`fetchPulses called with query="${query}", delayMs=${delayMs}, signal.aborted=${signal?.aborted}`);
   const trimmed = query.trim().toLowerCase();
 
   const results = trimmed
@@ -36,8 +41,26 @@ export function fetchPulses(query: string, delayMs?: number): Promise<Pulse[]> {
 
   const latency = delayMs ?? (trimmed.length === 0 ? 500 : Math.max(80, 400 - trimmed.length * 40));
 
-  return new Promise((resolve) => {
-    setTimeout(() => resolve([...results]), latency);
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      // console.log(`fetchPulses aborted immediately for query="${query}"`);
+      reject(new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+
+    // console.log(`fetchPulses will resolve for query="${query}" with ${results.length} results; latency=${latency}ms`);
+    const timeoutId = window.setTimeout(() => {
+      // console.log(`fetchPulses resolved for query="${query}" with ${results.length} results; latency=${latency}ms`);
+      resolve([...results]);
+    }, latency);
+
+    const onAbort = () => {
+      // console.log(`fetchPulses aborted for query="${query}"`);
+      window.clearTimeout(timeoutId);
+      reject(new DOMException('Aborted', 'AbortError'));
+    };
+
+    signal?.addEventListener('abort', onAbort, { once: true });
   });
 }
 

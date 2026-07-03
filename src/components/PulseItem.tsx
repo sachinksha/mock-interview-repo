@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { formatRelativeTime } from '../utils/formatTime';
 import type { Pulse } from '../types';
 
@@ -12,7 +13,7 @@ const TYPE_LABEL: Record<Pulse['type'], string> = {
   win: 'Win',
 };
 
-export function PulseItem({ pulse, onToggleRead }: PulseItemProps) {
+function PulseItemComponent({ pulse, onToggleRead }: PulseItemProps) {
   return (
     <li
       style={{
@@ -38,3 +39,5 @@ export function PulseItem({ pulse, onToggleRead }: PulseItemProps) {
     </li>
   );
 }
+
+export const PulseItem = memo(PulseItemComponent);
